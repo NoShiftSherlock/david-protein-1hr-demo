@@ -39,13 +39,55 @@ function cardHTML(p) {
   </a>`;
 }
 
+// ---------- On-demand catalog (David Now page) ----------
+const NOW_PRODUCTS = [
+  { line:"Gold",   format:"Single bar",  name:"Chocolate Chip Cookie Dough", img:"assets/bar-cccd.png",      size:"60g bar",   protein:"28g", price:"$3.49" },
+  { line:"Gold",   format:"4-bar pack",  name:"Chocolate Chip Cookie Dough", img:"assets/bar-cccd.png",      size:"4 × 60g",   protein:"28g", price:"$13.99" },
+  { line:"Bronze", format:"Single bar",  name:"Cookie Dough Caramel Chocolate", img:"assets/bar-bronze-cd.png", size:"60g bar", protein:"20g", price:"$3.49" },
+  { line:"Bronze", format:"4-bar pack",  name:"Cookie Dough Caramel Chocolate", img:"assets/bar-bronze-cd.png", size:"4 × 60g", protein:"20g", price:"$13.99" },
+  { line:"Gold",   format:"Single bar",  name:"Peanut Butter Chocolate Chunk", img:"assets/bar-pbcc.png",     size:"60g bar",   protein:"28g", price:"$3.49" },
+  { line:"Gold",   format:"Single bar",  name:"Blueberry Pie", img:"assets/bar-blueberry.png",                size:"60g bar",   protein:"28g", price:"$3.49" },
+  { line:"Bronze", format:"Single bar",  name:"Double Chocolate", img:"assets/bar-double-choc.png",           size:"60g bar",   protein:"20g", price:"$3.49" },
+  { line:"Bronze", format:"4-bar pack",  name:"Peanut Butter Chocolate", img:"assets/bar-bronze-pb.png",      size:"4 × 60g",   protein:"20g", price:"$13.99" },
+  { line:"Gold",   format:"Single bar",  name:"Fudge Brownie", img:"assets/bar-fudge.png",                    size:"60g bar",   protein:"28g", price:"$3.49" },
+  { line:"Gold",   format:"4-bar pack",  name:"Salted Peanut Butter", img:"assets/bar-salted-pb.png",         size:"4 × 60g",   protein:"28g", price:"$13.99" },
+  { line:"Cod",    format:"Single tin",  name:"Wild Caught Atlantic Cod", img:"assets/bar-cod.png",           size:"70g tin",   protein:"18g", price:"$4.99" },
+];
+
+function nowCardHTML(p) {
+  const lineClass = p.line.toLowerCase() === "bronze" ? "bronze" : "gold";
+  return `
+  <div class="now-card">
+    <div class="now-thumb">
+      <button class="now-add" onclick="addToCart()" aria-label="Add ${p.name}">Add</button>
+      <span class="now-protein">${p.protein}<small>protein</small></span>
+      <img src="${p.img}" alt="${p.name}" loading="lazy" />
+    </div>
+    <div class="now-body">
+      <div class="now-format"><span class="tag line ${lineClass}"><span class="dot"></span> ${p.line}</span> · ${p.format}</div>
+      <h3>${p.name}</h3>
+      <div class="now-foot"><span class="now-size">${p.size}</span><span class="now-price">${p.price}</span></div>
+    </div>
+  </div>`;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const grid = document.getElementById("prodGrid");
   if (grid) grid.innerHTML = PRODUCTS.map(cardHTML).join("");
+  const nowGrid = document.getElementById("nowGrid");
+  if (nowGrid) nowGrid.innerHTML = NOW_PRODUCTS.map(nowCardHTML).join("");
   // restore cart count
   const c = sessionStorage.getItem("cartCount");
   if (c) setCartCount(parseInt(c, 10));
 });
+
+// David Now address check -> reveal grid
+function nowCheck() {
+  const el = document.getElementById("nowAddrState");
+  const grid = document.getElementById("nowGridWrap");
+  if (el) el.classList.add("show");
+  if (grid) grid.classList.add("show");
+}
 
 // ---------- Cart ----------
 function setCartCount(n) {
