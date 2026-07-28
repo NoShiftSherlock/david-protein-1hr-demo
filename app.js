@@ -264,6 +264,37 @@ function cartRemove() { CART.qty = 1; renderCart(); }
 function toggleSub() { CART.sub = document.getElementById("cartSub").checked; renderCart(); }
 function toggleSubLink() { CART.sub = !CART.sub; const c=document.getElementById("cartSub"); if(c)c.checked=CART.sub; renderCart(); }
 
+// ---------- Mobile hamburger menu ----------
+function injectMobileMenu() {
+  if (document.getElementById("mobileMenu")) return;
+  const active = location.pathname.endsWith("david-now.html") ? "david-now" : "";
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+    <nav class="mobile-menu" id="mobileMenu" aria-label="Menu">
+      <div class="mm-head">
+        <img src="assets/logo-white.png" alt="David" />
+        <button class="mm-close" onclick="closeMenu()" aria-label="Close menu">✕</button>
+      </div>
+      <div class="mm-links">
+        <a href="index.html#shop">Shop all</a>
+        <a href="index.html#shop">Bars</a>
+        <a href="index.html#shop">Pints</a>
+        <a href="index.html#shop">Bundle</a>
+        <a href="david-now.html" class="${active === "david-now" ? "active" : ""}">David Now</a>
+      </div>
+      <div class="mm-cta"><a href="david-now.html" class="btn btn-white btn-block">⚡ Check your address</a></div>
+      <div class="mm-sub">
+        <a href="#">Store locator</a>
+        <a href="#">Wholesale</a>
+        <a href="checkout.html" onclick="event.preventDefault();closeMenu();openCart()">Cart</a>
+      </div>
+    </nav>`;
+  document.body.appendChild(wrap);
+}
+function openMenu() { injectMobileMenu(); requestAnimationFrame(() => { document.getElementById("menuOverlay").classList.add("open"); document.getElementById("mobileMenu").classList.add("open"); }); }
+function closeMenu() { const o = document.getElementById("menuOverlay"), m = document.getElementById("mobileMenu"); if (o) o.classList.remove("open"); if (m) m.classList.remove("open"); }
+
 // ---------- tiny toast ----------
 function toast(msg) {
   let t = document.getElementById("__toast");

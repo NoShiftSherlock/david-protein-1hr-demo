@@ -118,6 +118,34 @@ h1, h2, h3, .serif {
 }
 .header.light .cart-count { background: var(--white); color: var(--black); }
 
+/* ---------- Hamburger + mobile menu ---------- */
+.hamburger {
+  display: none; width: 40px; height: 40px; align-items: center; justify-content: center;
+  background: transparent; border: 0; color: inherit; padding: 0;
+}
+.hamburger svg { width: 24px; height: 24px; }
+
+.menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 110; opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility .3s ease; }
+.menu-overlay.open { opacity: 1; visibility: visible; }
+.mobile-menu {
+  position: fixed; top: 0; left: 0; height: 100%; width: 320px; max-width: 86vw;
+  background: var(--black); color: #fff; z-index: 111;
+  transform: translateX(-100%); transition: transform .32s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column;
+}
+.mobile-menu.open { transform: translateX(0); }
+.mm-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid var(--line-dark); }
+.mm-head img { height: 24px; width: auto; }
+.mm-close { background: transparent; border: 1px solid var(--line-dark); border-radius: 8px; color: #fff; font-size: 16px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+.mm-links { display: flex; flex-direction: column; padding: 16px 0 6px; }
+.mm-links a { font-family: var(--serif); font-size: 27px; line-height: 1; padding: 13px 24px; color: #fff; letter-spacing: -.01em; }
+.mm-links a.active { color: #ffd76e; }
+.mm-sub { margin-top: auto; border-top: 1px solid var(--line-dark); padding: 18px 24px; display: flex; flex-direction: column; gap: 14px; }
+.mm-sub a { font-family: var(--sans); font-size: 14px; color: rgba(255,255,255,.8); }
+.mm-cta { margin: 6px 24px 26px; }
+
+@media (max-width: 620px) { .hamburger { display: inline-flex; } }
+
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
