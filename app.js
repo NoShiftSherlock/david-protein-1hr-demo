@@ -133,22 +133,136 @@ function qty(d) {
   if (el) el.textContent = q;
 }
 
-// ---------- Checkout: shipping method ----------
-function pickShip(el) {
-  document.querySelectorAll(".ship-opt").forEach(o => o.classList.remove("selected"));
+// ---------- Checkout v2: shipping + plan + totals ----------
+const CO = { subtotal: 78.0, tax: 6.92, ship: 7.0, shipLabel: "1-Hour delivery" };
+
+function selectShip(el) {
+  document.querySelectorAll("#shipOpts .co-opt").forEach(o => o.classList.remove("selected"));
   el.classList.add("selected");
-  const cost = parseFloat(el.dataset.cost);
-  const subtotal = 27.98, tax = 2.48;
-  const total = subtotal + cost + tax;
-  const shipEl = document.getElementById("coShip");
-  const totalEl = document.getElementById("coTotal");
-  const label = el.querySelector(".n").textContent.includes("Standard") ? "Standard shipping" : "One-hour delivery";
-  if (shipEl) { shipEl.textContent = "$" + cost.toFixed(2); shipEl.previousElementSibling.textContent = label; }
-  if (totalEl) totalEl.textContent = "$" + total.toFixed(2);
+  CO.ship = parseFloat(el.dataset.cost);
+  CO.shipLabel = el.dataset.label || "Shipping";
+  // show/hide the 1-hour routing note
+  const note = document.getElementById("routeNote");
+  if (note) note.style.display = el.classList.contains("onehr") ? "flex" : "none";
+  updateCheckoutTotals();
+}
+function updateCheckoutTotals() {
+  const total = CO.subtotal + CO.ship + CO.tax;
+  const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+  set("sumShipLabel", CO.shipLabel);
+  set("sumShip", CO.ship === 0 ? "FREE" : "$" + CO.ship.toFixed(2));
+  set("sumTotal", "$" + total.toFixed(2));
+  const inst = (total / 4).toFixed(2);
+  set("instAmt", "$" + inst);
+  const pb = document.getElementById("placeBtn");
+  if (pb) pb.textContent = "Place order · $" + total.toFixed(2);
+}
+function selectPlan(el) {
+  document.querySelectorAll("#planOpts .co-opt").forEach(o => o.classList.remove("selected"));
+  el.classList.add("selected");
 }
 function placeOrder() {
-  toast("Order placed ⚡ Routing to nearest store — arriving in ~52 min");
+  const oneHr = document.querySelector("#shipOpts .co-opt.selected.onehr");
+  toast(oneHr ? "Order placed ⚡ Routing to nearest store — arriving in ~52 min"
+              : "Order placed ✓ Thanks — your David order is confirmed.");
 }
+document.addEventListener("DOMContentLoaded", updateCheckoutTotals);
+
+// ---------- Slide-out cart drawer + rewards meter ----------
+const CART = { name: "Chocolate Chip Cookie Dough", line: "Gold", img: "assets/bar-cccd.png", unit: 39.0, qty: 2, sub: false };
+const TIERS = [
+  { key: "ship", label: "Free Shipping", at: 2, pos: 16 },
+  { key: "gift", label: "Free Gift",     at: 3, pos: 58 },
+  { key: "cart", label: "Free Carton",   at: 4, pos: 100 },
+];
+
+function injectCartDrawer() {
+  if (document.getElementById("cartDrawer")) return;
+  const wrap = document.createElement("div");
+  wrap.innerHTML = `
+    <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Your cart">
+      <div class="cart-head">
+        <h2>Your cart <span id="cartQtyHead">(2)</span></h2>
+        <button class="cart-close" onclick="closeCart()" aria-label="Close cart">✕</button>
+      </div>
+      <div class="meter">
+        <div class="meter-tiers" id="meterTiers"></div>
+        <div class="meter-track"><div class="meter-fill" id="meterFill"></div><div id="meterNodes"></div></div>
+        <div class="meter-msg" id="meterMsg"></div>
+      </div>
+      <div class="cart-eligible"><span>⚡</span> <span>This item is eligible for <b>1-hour delivery</b> in New York.</span></div>
+      <div class="cart-body" id="cartBody"></div>
+      <div class="cart-foot">
+        <div class="cart-sub-toggle">
+          <label><input type="checkbox" id="cartSub" onchange="toggleSub()" /> Subscribe to your cart &amp; save.</label>
+          <span class="save">Save 10%</span>
+        </div>
+        <button class="cart-checkout" onclick="location.href='checkout.html'" id="cartCheckoutBtn">Checkout — $78</button>
+        <div class="cart-fineprint">Taxes, discounts and shipping calculated at checkout.</div>
+      </div>
+    </aside>`;
+  document.body.appendChild(wrap);
+  renderCart();
+}
+
+function renderCart() {
+  const q = CART.qty;
+  // tiers
+  const tiers = document.getElementById("meterTiers");
+  if (tiers) tiers.innerHTML = TIERS.map(t => `<div class="meter-tier ${q >= t.at ? "done" : ""}">${t.label}</div>`).join("");
+  // nodes
+  const nodes = document.getElementById("meterNodes");
+  if (nodes) nodes.innerHTML = TIERS.map(t => {
+    const state = q >= t.at ? (q === t.at ? "current" : "done") : "";
+    return `<div class="meter-node ${state}" style="left:${t.pos}%"><span class="lbl">${t.at} Carton${t.at>1?"s":""}</span></div>`;
+  }).join("");
+  // fill
+  const fill = document.getElementById("meterFill");
+  if (fill) {
+    let pct = 6;
+    if (q >= 4) pct = 100; else if (q === 3) pct = 58; else if (q === 2) pct = 16; else pct = 6;
+    fill.style.width = pct + "%";
+  }
+  // message
+  const msg = document.getElementById("meterMsg");
+  if (msg) {
+    if (q >= 4) msg.innerHTML = `🎉 You've unlocked a <b>free carton</b>!`;
+    else if (q === 3) msg.innerHTML = `Add <b>1 more carton</b> to unlock a free carton.`;
+    else if (q === 2) msg.innerHTML = `<span class="bolt">✓</span> Free shipping unlocked — add 1 more for a <b>free gift</b>.`;
+    else msg.innerHTML = `Add <b>1 more carton</b> for free shipping.`;
+  }
+  // line item
+  const body = document.getElementById("cartBody");
+  if (body) body.innerHTML = `
+    <div class="cart-line">
+      <div class="im"><img src="${CART.img}" alt="" /></div>
+      <div class="info">
+        <div class="ln"><span class="dot"></span> ${CART.line}</div>
+        <h3>${CART.name}</h3>
+        <div class="pr">$${CART.unit.toFixed(2)}&nbsp; | &nbsp;1 Carton – 12 Bars.</div>
+        <div class="sub-row"><span>Subscription:<br/>${CART.sub ? "Subscribe & Save 10%" : "One-Time Purchase"}</span><a href="#" onclick="event.preventDefault();toggleSubLink()">Edit</a></div>
+        <div class="qty-row2">
+          <div class="cart-stepper"><button onclick="cartQty(-1)">−</button><span id="cartLineQty">${CART.qty}</span><button onclick="cartQty(1)">+</button></div>
+          <button class="rm" onclick="cartRemove()">Remove</button>
+        </div>
+      </div>
+    </div>`;
+  // header + checkout total
+  const factor = CART.sub ? 0.9 : 1;
+  const total = CART.qty * CART.unit * factor;
+  const head = document.getElementById("cartQtyHead");
+  if (head) head.textContent = `(${CART.qty})`;
+  const btn = document.getElementById("cartCheckoutBtn");
+  if (btn) btn.textContent = `Checkout — $${total.toFixed(total % 1 ? 2 : 0)}`;
+  setCartCount(CART.qty);
+}
+function openCart() { injectCartDrawer(); requestAnimationFrame(() => { document.getElementById("cartOverlay").classList.add("open"); document.getElementById("cartDrawer").classList.add("open"); }); }
+function closeCart() { const o=document.getElementById("cartOverlay"), d=document.getElementById("cartDrawer"); if(o)o.classList.remove("open"); if(d)d.classList.remove("open"); }
+function cartQty(d) { CART.qty = Math.max(1, CART.qty + d); renderCart(); }
+function cartRemove() { CART.qty = 1; renderCart(); }
+function toggleSub() { CART.sub = document.getElementById("cartSub").checked; renderCart(); }
+function toggleSubLink() { CART.sub = !CART.sub; const c=document.getElementById("cartSub"); if(c)c.checked=CART.sub; renderCart(); }
 
 // ---------- tiny toast ----------
 function toast(msg) {

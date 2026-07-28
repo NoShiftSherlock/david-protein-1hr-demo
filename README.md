@@ -6,8 +6,12 @@ Built by AccelPay / Vesper Commerce for a sales conversation with David Protein.
 
 ## Pages
 - **index.html** — Homepage. David's real look & feel + a signature "Need it now? Get David in under an hour" band with a live address check, a customer-facing "How it works", and ⚡ 1-hr tags across the product grid.
+- **david-now.html** — Dedicated on-demand collection page (à la Nectar Now): hero with delivery facts, sticky address bar, and a grid of single-serve / small-format items with per-unit pricing.
 - **product.html** — Product detail page (Chocolate Chip Cookie Dough) with a third purchase option — **⚡ 1-Hour Delivery** — that reveals an address check and delivery-only small formats (single bar / 4-pack).
-- **checkout.html** — Shopify-style checkout with the delivery-method selector (1-Hour Delivery via DoorDash/GoPuff selected by default vs. Standard shipping) and the "order stays in your Shopify OMS" reassurance.
+- **checkout.html** — David Shop-style checkout: Ship to block, a shipping selector combining the standard tiers (2-4 Day Standard FREE, 2-Day Air, 1-Day Air) **plus** the new 1-Hour Delivery options (DoorDash / GoPuff), a Plan section (Pay now / Pay in 4), an upsell rail, discount code, and a live-updating order summary. Includes the "order stays in your Shopify OMS" reassurance.
+
+## Shared components
+- **Slide-out cart drawer** (all pages, opens from the Cart pill) — replicates David's rewards meter: Free Shipping → Free Gift → Free Carton milestones that fill as you add cartons (2/3/4), line item with subscription + qty stepper, "Subscribe & save 10%" toggle, and a live checkout total.
 
 ## Design notes
 - Replicates David's design system: **Instrument Serif** display + **Inter** body (Suisse substitute), black/white palette, pill buttons, off-white product panels, and their nav/footer.
